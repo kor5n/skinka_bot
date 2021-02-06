@@ -14,6 +14,26 @@ class CustomClient(discord.Client):
     async def on_message(self,message):
         if (self.user == message.author):
             return
+        if message.content.startswith("!x0-start") :
+            channel = message.channel
+            result = message.content.split()
+            await channel.send("starting new game players: " + result[1] + " and " +result[2])
+                
+            c11 = "."
+            c12 = "."
+            c13 = "."
+            c21 = "."
+            c22 = "."
+            c23 = "."
+            c31 = "."
+            c32 = "."
+            c33 = "."
+            await channel.send("""
+                1 2 3
+              1 . . .
+              2 . . .
+              3 . . .
+            """)
 
         if message.content.startswith('!python'):
             channel = message.channel
