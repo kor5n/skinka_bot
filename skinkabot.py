@@ -11,29 +11,43 @@ intents = discord.Intents()
 intents.members = True
 
 class CustomClient(discord.Client):
-    async def on_message(self,message):
-        if (self.user == message.author):
-            return
+    def __init__(self, intents,  c = [['.', '.', '.'],['.', '.', '.'], ['.', '.', '.']]):
+        super(CustomClient, self).__init__(intents=intents)
+        self.c = c
+        
+    async def x0game(self,message):
+        if message.content.startswith('!x0-move'):
+            channel = message.channel
+            result = message.content.split()
+            stroka = int(result[2]) - 1 
+            kolonka = int(result[3]) - 1
+            x_or_0 = result[1]
+            if self.c[stroka][kolonka] == '.':
+                self.c[stroka][kolonka] = x_or_0 
+            else:
+                await channel.send("Жулик! Не жульничай!")
+            await self.xprint(message)
+        
+    async def xprint (self,message):
+        channel = message.channel 
+        await channel.send(self.c[0])
+        await channel.send(self.c[1])
+        await channel.send(self.c[2])
+
+    async def x0start (self,message):
         if message.content.startswith("!x0-start") :
             channel = message.channel
             result = message.content.split()
             await channel.send("starting new game players: " + result[1] + " and " +result[2])
-                
-            c11 = "."
-            c12 = "."
-            c13 = "."
-            c21 = "."
-            c22 = "."
-            c23 = "."
-            c31 = "."
-            c32 = "."
-            c33 = "."
-            await channel.send("""
-                1 2 3
-              1 . . .
-              2 . . .
-              3 . . .
-            """)
+            
+            await self.xprint(message)
+
+    async def on_message(self,message):
+        if (self.user == message.author):
+            return
+
+        await self.x0start(message)
+        await self.x0game (message)
 
         if message.content.startswith('!python'):
             channel = message.channel
@@ -55,7 +69,5 @@ class CustomClient(discord.Client):
 intents = discord.Intents.default()
 intents.members = True
 
-client = CustomClient(intents=intents)
-client.run(TOKEN)
-
-
+bot = CustomClient(intents=intents)
+bot.run(TOKEN)
