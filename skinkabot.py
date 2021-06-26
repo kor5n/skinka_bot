@@ -14,7 +14,7 @@ class CustomClient(discord.Client):
     def __init__(self, intents,  c = [['.', '.', '.'],['.', '.', '.'], ['.', '.', '.']]):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
-        
+        self.game_over = False
     async def x0game(self,message):
         if message.content.startswith('!x0-move'):
             channel = message.channel
@@ -23,11 +23,21 @@ class CustomClient(discord.Client):
             kolonka = int(result[3]) - 1
             x_or_0 = result[1]
             if self.c[stroka][kolonka] == '.':
-                self.c[stroka][kolonka] = x_or_0 
+                self.c[stroka][kolonka] = x_or_0
+                await self.x0in_row(message, x_or_0)
             else:
                 await channel.send("Жулик! Не жульничай!")
             await self.xprint(message)
-        
+
+    async def x0in_row(self, message, x_or_0):
+        for row in range(3): 
+            if self.c[row][0] == x_or_0 and self.c[row][1] == x_or_0 and self.c[row][2] == x_or_0:
+                self.game_over = True
+
+        if self.game_over == True:
+            channel = message.channel
+            await channel.send("Игрок игравший за " + x_or_0 + " выиграл!!!")
+            
     async def xprint (self,message):
         channel = message.channel 
         await channel.send(self.c[0])
@@ -36,6 +46,7 @@ class CustomClient(discord.Client):
 
     async def x0start (self,message):
         if message.content.startswith("!x0-start") :
+            self.game_over = False
             channel = message.channel
             result = message.content.split()
             await channel.send("starting new game players: " + result[1] + " and " +result[2])
@@ -48,6 +59,7 @@ class CustomClient(discord.Client):
 
         await self.x0start(message)
         await self.x0game (message)
+        
 
         if message.content.startswith('!python'):
             channel = message.channel
