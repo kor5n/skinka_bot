@@ -15,28 +15,46 @@ class CustomClient(discord.Client):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
         self.game_over = False
+        self.x0_turn = "x"
+    def x0change_turn(self):
+        if self.x0_turn == "x":
+            self.x0_turn = "0"
+        else:
+            self.x0_turn = "x"
     async def x0game(self,message):
+        if self.game_over == True:
+            return
+        await message.channel.send("Ходит " + self.x0_turn + ".") 
         if message.content.startswith('!x0-move'):
             channel = message.channel
             result = message.content.split()
-            stroka = int(result[2]) - 1 
-            kolonka = int(result[3]) - 1
-            x_or_0 = result[1]
+            stroka = int(result[1]) - 1 
+            kolonka = int(result[2]) - 1
+            x_or_0 = self.x0_turn
             if self.c[stroka][kolonka] == '.':
                 self.c[stroka][kolonka] = x_or_0
                 await self.x0in_row(message, x_or_0)
+                self.x0change_turn()
             else:
                 await channel.send("Жулик! Не жульничай!")
             await self.xprint(message)
+        
 
     async def x0in_row(self, message, x_or_0):
         for row in range(3): 
             if self.c[row][0] == x_or_0 and self.c[row][1] == x_or_0 and self.c[row][2] == x_or_0:
                 self.game_over = True
-
+        for collon in range(3):
+            if self.c[0][collon] == x_or_0 and self.c[1][collon] == x_or_0 and self.c[2][collon] == x_or_0:
+                self.game_over = True
+        if self.c[0][0] == x_or_0 and self.c[1][1] == x_or_0 and self.c[2][2] == x_or_0:
+            self.game_over = True
+        if self.c[0][2] == x_or_0 and self.c[1][1] == x_or_0 and self.c[2][0] == x_or_0:
+            self.game_over = True
         if self.game_over == True:
             channel = message.channel
-            await channel.send("Игрок игравший за " + x_or_0 + " выиграл!!!")
+            await channel.send("Игрок игравший за " + x_or_0 + " выиграл! Игра окончена.")
+            
             
     async def xprint (self,message):
         channel = message.channel 
