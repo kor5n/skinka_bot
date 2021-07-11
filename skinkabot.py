@@ -1,6 +1,6 @@
 #skinkabot.py
 import os
-
+import random
 import discord
 from dotenv import load_dotenv
 
@@ -11,16 +11,34 @@ intents = discord.Intents()
 intents.members = True
 
 class CustomClient(discord.Client):
+
     def __init__(self, intents,  c = [['.', '.', '.'],['.', '.', '.'], ['.', '.', '.']]):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
         self.game_over = False
         self.x0_turn = "x"
-    def x0change_turn(self):
+        self.player_bot = False
+    async def bot_move(self, message):
+        if self.game_over == True:
+            self.player_bot = False
+            return
+        bot_stroka = random.randint(0, 2)
+        bot_kolonka = random.randint(0, 2)
+        if self.c[bot_stroka][bot_kolonka] == '.':
+            self.c[bot_stroka][bot_kolonka] = "0"
+            await self.x0in_row(message, "0")
+            await self.x0change_turn(message)
+        if self.c[bot_stroka][bot_kolonka] == 'x' or '0':
+            self.bot_move(message)
+        await self.xprint(message)
+    async def x0change_turn(self, message):
         if self.x0_turn == "x":
             self.x0_turn = "0"
         else:
             self.x0_turn = "x"
+        if self.player_bot == True:
+            if self.x0_turn == "0":
+               await self.bot_move(message)
     async def x0game(self,message):
         
         if self.game_over == True:
@@ -35,7 +53,7 @@ class CustomClient(discord.Client):
             if self.c[stroka][kolonka] == '.':
                 self.c[stroka][kolonka] = x_or_0
                 await self.x0in_row(message, x_or_0)
-                self.x0change_turn()
+                await self.x0change_turn(message)
                 if not self.game_over:
                     await message.channel.send("Ходит " + self.x0_turn + ".") 
             else:
@@ -57,8 +75,7 @@ class CustomClient(discord.Client):
         if self.game_over == True:
             channel = message.channel
             await channel.send("Игрок игравший за " + x_or_0 + " выиграл! Игра окончена.")
-            
-            
+
     async def xprint (self,message):
         channel = message.channel 
         await channel.send(self.c[0])
@@ -66,7 +83,15 @@ class CustomClient(discord.Client):
         await channel.send(self.c[2])
 
     async def x0start (self,message):
-        if message.content.startswith("!x0-start") :
+        if message.content.startswith("!x0-start"):
+            self.game_over = False
+            self.player_bot = True
+            channel = message.channel
+            result = message.content.split()
+            await channel.send("Starting new game players: Korv and " + result[1])
+            await message.channel.send("Ходит " + self.x0_turn + ".") 
+            await self.xprint(message)
+        if message.content.startswith("!x0-start pvp") :
             self.game_over = False
             channel = message.channel
             result = message.content.split()
