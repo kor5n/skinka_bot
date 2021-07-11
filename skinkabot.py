@@ -22,9 +22,10 @@ class CustomClient(discord.Client):
         else:
             self.x0_turn = "x"
     async def x0game(self,message):
+        
         if self.game_over == True:
             return
-        await message.channel.send("Ходит " + self.x0_turn + ".") 
+        
         if message.content.startswith('!x0-move'):
             channel = message.channel
             result = message.content.split()
@@ -35,6 +36,8 @@ class CustomClient(discord.Client):
                 self.c[stroka][kolonka] = x_or_0
                 await self.x0in_row(message, x_or_0)
                 self.x0change_turn()
+                if not self.game_over:
+                    await message.channel.send("Ходит " + self.x0_turn + ".") 
             else:
                 await channel.send("Жулик! Не жульничай!")
             await self.xprint(message)
@@ -68,7 +71,7 @@ class CustomClient(discord.Client):
             channel = message.channel
             result = message.content.split()
             await channel.send("starting new game players: " + result[1] + " and " +result[2])
-            
+            await message.channel.send("Ходит " + self.x0_turn + ".") 
             await self.xprint(message)
 
     async def on_message(self,message):
