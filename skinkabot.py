@@ -19,18 +19,52 @@ class CustomClient(discord.Client):
         self.x0_turn = "x"
         self.player_bot = False
 
+    def smart_win(self):
+        smart_move_row = 0
+        smart_move_col = 0
+
+        for row in range(3):
+            if self.c[row][0] == "0" and self.c[row][1] == '0' and self.c[row][2] == '.' :
+                smart_move_row = row + 1
+                smart_move_col = 3
+            
+        return (smart_move_row, smart_move_col)
+
+    def smart_defence(self):
+        smart_move_row = 0
+        smart_move_col = 0
+        for row in range(3):
+            if self.c[row][0] == "x" and self.c[row][1] == 'x' and self.c[row][2] == '.' :
+                smart_move_row = row + 1
+                smart_move_col = 3
+        
+        return (smart_move_row, smart_move_col)
+
     async def bot_move(self, message):
         if self.game_over == True:
             self.player_bot = False
             return
-        bot_stroka = random.randint(0, 2)
-        bot_kolonka = random.randint(0, 2)
+        
+        smart_move = self.smart_win()
+
+        if smart_move[0] == 0 and smart_move[1] == 0:
+            smart_move = self.smart_defence()
+            if smart_move[0] == 0 and smart_move[1] == 0:   
+                bot_stroka = random.randint(0, 2)
+                bot_kolonka = random.randint(0, 2)
+            else:
+                bot_stroka = smart_move[0] -1 
+                bot_kolonka = smart_move[1] -1
+        else:
+            bot_stroka = smart_move[0] -1
+            bot_kolonka = smart_move[1] -1
+                
         if self.c[bot_stroka][bot_kolonka] == ".":
             self.c[bot_stroka][bot_kolonka] = "0"
             await self.x0in_row(message, "0")
             await self.x0change_turn(message)
-        if self.c[bot_stroka][bot_kolonka] == "x" or "0":
-            self.bot_move(message)
+        elif self.c[bot_stroka][bot_kolonka] == "x" or "0":
+            await self.bot_move(message)
         await self.xprint(message)
 
     async def x0change_turn(self, message):
