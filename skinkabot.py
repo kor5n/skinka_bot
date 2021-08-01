@@ -33,12 +33,69 @@ class CustomClient(discord.Client):
     def smart_defence(self):
         smart_move_row = 0
         smart_move_col = 0
-        for row in range(3):
-            if self.c[row][0] == "x" and self.c[row][1] == 'x' and self.c[row][2] == '.' :
-                smart_move_row = row + 1
-                smart_move_col = 3
-        
-        return (smart_move_row, smart_move_col)
+        #      0
+        #      |
+
+        # 0 -> x . 0    c[0][1]
+        # 1 -> x x x
+        # x . .
+        count0 = 0
+        count1 = 0
+        count2 = 0
+        col = 0
+        cords_real1 = 0
+        cords_real2 = 0
+        cords01 = 0
+        cords02 = 0
+        cords11 = 0
+        cords22 = 0
+        cords31 = 0
+        cords32 = 0
+        strok = 0
+
+        for row in range(9):
+            #1 - poschitatj v peremennuju count kollichetvo x v stroke 
+            
+            
+            
+            # x . x
+            if self.c[strok][col] == '.':
+                if strok == 0:
+                    count0 += 1 
+                    cords01 = 0
+                    cords02 = col
+                elif strok == 1:
+                    count1 += 1
+                    cords11 = 1
+                    cords12 = col
+                elif strok == 2:
+                    count2 += 1
+                    cords21 = 2
+                    cords22 = col
+            if strok == 2:
+                col += 1
+                strok -= 3
+            strok += 1
+            if col == 3 and count0 == 2 or 0 or 3:
+                cords01 = 0
+                cords02 =  0
+            if col == 3 and count1 == 2 or 0 or 3:
+                cords11 = 0
+                cords12 =  0
+            if col == 3 and count2 == 2 or 0 or 3:
+                cords21 = 0
+                cords22 =  0
+            
+            if col == 3 and count0 == 1:
+                cords_real1 = cords01  
+                cords_real2 = cords02 
+            if col == 3 and count1 == 1:
+                cords_real1 = cords21  
+                cords_real2 = cords22   
+            if col == 3 and count2 == 1:
+                cords_real1 = cords21  
+                cords_real2 = cords22   
+        return (cords_real1, cords_real2)
 
     async def bot_move(self, message):
         if self.game_over == True:
