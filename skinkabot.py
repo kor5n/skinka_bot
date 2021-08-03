@@ -122,7 +122,7 @@ class CustomClient(discord.Client):
             await self.x0change_turn(message)
         elif self.c[bot_stroka][bot_kolonka] == "x" or "0":
             await self.bot_move(message)
-        await self.xprint(message)
+        
 
     async def x0change_turn(self, message):
         if self.x0_turn == "x":
@@ -138,7 +138,7 @@ class CustomClient(discord.Client):
         if self.game_over == True:
             return
 
-        if message.content.startswith("!x0-move"):
+        if message.content.startswith("/x0-move"):
             channel = message.channel
             result = message.content.split()
             stroka = int(result[1]) - 1
@@ -184,17 +184,18 @@ class CustomClient(discord.Client):
         await channel.send(self.c[0])
         await channel.send(self.c[1])
         await channel.send(self.c[2])
-
+        
+            
     async def x0start(self, message):
-        if message.content.startswith("!x0-start"):
+        if message.content.startswith("/x0-start"):
             self.game_over = False
             self.player_bot = True
             channel = message.channel
             result = message.content.split()
-            await channel.send("Starting new game players: Korv and " + result[1])
+            await channel.send("Starting new game players: Korveee and " + result[1])
             await message.channel.send("Ходит " + self.x0_turn + ".")
             await self.xprint(message)
-        if message.content.startswith("!x0-start pvp"):
+        if message.content.startswith("/x0-start pvp"):
             self.game_over = False
             channel = message.channel
             result = message.content.split()
@@ -203,7 +204,7 @@ class CustomClient(discord.Client):
             )
             await message.channel.send("Ходит " + self.x0_turn + ".")
             await self.xprint(message)
-
+        
     async def on_message(self, message):
         if self.user == message.author:
             return
@@ -211,7 +212,7 @@ class CustomClient(discord.Client):
         await self.x0start(message)
         await self.x0game(message)
 
-        if message.content.startswith("!python"):
+        if message.content.startswith("/python"):
             channel = message.channel
             await channel.send(
                 "Python is the most popular programming language in the world."
