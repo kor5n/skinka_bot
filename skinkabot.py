@@ -155,6 +155,16 @@ class CustomClient(discord.Client):
             await self.xprint(message)
 
     async def x0in_row(self, message, x_or_0):
+        if self.c[0][0] != ".":
+            if self.c[0][1] != ".":
+                if self.c[0][2] != ".":
+                    if self.c[1][0] != ".":
+                        if self.c[1][1] != ".":
+                            if self.c[1][2] != ".":
+                                if self.c[2][0] != ".":
+                                    if self.c[2][1] != ".":
+                                        if self.c[2][2] != ".":
+                                            self.game_over = True
         for row in range(3):
             if (
                 self.c[row][0] == x_or_0
