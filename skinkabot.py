@@ -3,6 +3,7 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
+from guessing_game import game
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -18,10 +19,12 @@ class CustomClient(discord.Client):
         self.game_over = False
         self.x0_turn = "x"
         self.player_bot = False
+        self.play = False
+        self.number = 50.0
 
     def smart_win(self):
-        smart_move_row = 0
-        smart_move_col = 0
+        smart_move_row = -1
+        smart_move_col = -1
 
         for row in range(3):
             if self.c[row][0] == "0" and self.c[row][1] == '0' and self.c[row][2] == '.' :
@@ -29,8 +32,39 @@ class CustomClient(discord.Client):
                 smart_move_col = 3
             
         return (smart_move_row, smart_move_col)
+    
+    def smart_defence_diagonal(self):
+        count_dia = 0
+        dia_gde_tochka = -1
+        
+        for dia in range(3):
+            if self.c[dia][dia] == 'x':
+                count_dia += 1
+            if self.c[dia][dia] == ".":
+                dia_gde_tochka = dia
+        
+        if count_dia == 2 and dia_gde_tochka != -1:
+            return(dia_gde_tochka, dia_gde_tochka)
+        
+        dia_gde_tochka1 = -1
+        count_dia = 0
+        dia_gde_tochka = -1
+        dia1 = 2
+        for dia in range(3):
+            if self.c[dia][dia1] == 'x':
+                count_dia += 1
+            if self.c[dia][dia1] == ".":
+                dia_gde_tochka = dia
+                dia_gde_tochka1 = dia1
+            dia1 -= 1
+
+        if count_dia == 2 and dia_gde_tochka != -1:
+            return(dia_gde_tochka, dia_gde_tochka1)
+        else:
+            return(-1, -1) 
 
     def smart_defence(self):
+        
         smart_move_row = 0
         smart_move_col = 0
         #      0
@@ -43,8 +77,8 @@ class CustomClient(discord.Client):
         count1 = 0
         count2 = 0
         col = 0
-        cords_real1 = 0
-        cords_real2 = 0
+        cords_real1 = -1
+        cords_real2 = -1
         cords01 = 0
         cords02 = 0
         cords11 = 0
@@ -56,8 +90,8 @@ class CustomClient(discord.Client):
         for row in range(9):
             #1 - poschitatj v peremennuju count kollichetvo x v stroke 
             
-            
-            
+            # . . x
+            # x . x
             # x . x
             if self.c[strok][col] == '.':
                 if strok == 0:
@@ -76,15 +110,15 @@ class CustomClient(discord.Client):
                 col += 1
                 strok -= 3
             strok += 1
-            if col == 3 and count0 == 2 or 0 or 3:
+            if col == 3 and count0 == 2 or count0 == 0 or count0 == 3:
                 cords01 = 0
-                cords02 =  0
-            if col == 3 and count1 == 2 or 0 or 3:
+                cords02 = 0
+            if col == 3 and count1 == 2 or count1 == 0 or count1 == 3:
                 cords11 = 0
-                cords12 =  0
-            if col == 3 and count2 == 2 or 0 or 3:
+                cords12 = 0
+            if col == 3 and count2 == 2 or count2 == 0 or count2 == 3:
                 cords21 = 0
-                cords22 =  0
+                cords22 = 0
             
             if col == 3 and count0 == 1:
                 cords_real1 = cords01  
@@ -104,14 +138,16 @@ class CustomClient(discord.Client):
         
         smart_move = self.smart_win()
 
-        if smart_move[0] == 0 and smart_move[1] == 0:
+        if smart_move[0] == -1 and smart_move[1] == -1:
             smart_move = self.smart_defence()
-            if smart_move[0] == 0 and smart_move[1] == 0:   
-                bot_stroka = random.randint(0, 2)
-                bot_kolonka = random.randint(0, 2)
-            else:
-                bot_stroka = smart_move[0] -1 
-                bot_kolonka = smart_move[1] -1
+            if smart_move[0] == -1 and smart_move[1] == -1:
+                smart_move = self.smart_defence_diagonal()
+                if smart_move[0] == -1 and smart_move[1] == -1:    
+                    bot_stroka = random.randint(0, 2)
+                    bot_kolonka = random.randint(0, 2)
+                else:
+                    bot_stroka = smart_move[0] -1 
+                    bot_kolonka = smart_move[1] -1
         else:
             bot_stroka = smart_move[0] -1
             bot_kolonka = smart_move[1] -1
@@ -138,6 +174,7 @@ class CustomClient(discord.Client):
         if self.game_over == True:
             return
 
+
         if message.content.startswith("/x0-move"):
             channel = message.channel
             result = message.content.split()
@@ -155,16 +192,18 @@ class CustomClient(discord.Client):
             await self.xprint(message)
 
     async def x0in_row(self, message, x_or_0):
-        if self.c[0][0] != ".":
-            if self.c[0][1] != ".":
-                if self.c[0][2] != ".":
-                    if self.c[1][0] != ".":
-                        if self.c[1][1] != ".":
-                            if self.c[1][2] != ".":
-                                if self.c[2][0] != ".":
-                                    if self.c[2][1] != ".":
-                                        if self.c[2][2] != ".":
-                                            self.game_over = True
+        full_count = 0
+        full_strok = 0
+        full_col = 0
+        for full in range(9):
+            if self.c[full_strok][full_col] != ".":
+                full_count += 1
+            if full_col == 2:
+                full_col -= 3
+                full_strok += 1    
+            full_col += 1
+            if full_count == 9:
+                self.game_over = True  
         for row in range(3):
             if (
                 self.c[row][0] == x_or_0
@@ -216,17 +255,26 @@ class CustomClient(discord.Client):
             await self.xprint(message)
         
     async def on_message(self, message):
+
         if self.user == message.author:
             return
 
         await self.x0start(message)
         await self.x0game(message)
 
-        if message.content.startswith("/python"):
+        number,play = await game(message,self.play,self.number)
+
+        if message.content.startswith("/help"):
             channel = message.channel
             await channel.send(
-                "Python is the most popular programming language in the world."
+                message.author + "Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['.', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
             )
+        if message.content.startswith("/привет"):
+            channel = message.channel
+            await channel.send(
+                "Привет я Korvee давай дружить?"
+            )
+    
 
     async def on_member_join(self, member):
         await member.send(f"Hello, {member.name}!")
