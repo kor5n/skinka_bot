@@ -13,13 +13,12 @@ intents.members = True
 
 
 class CustomClient(discord.Client):
-    def __init__(self, intents, c=[[".", ".", "."], [".", ".", "."], [".", ".", "."]]):
+    def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
         self.game_over = False
         self.x0_turn = "x"
         self.player_bot = False
-        self.play = False
         self.number = 50.0
 
     def smart_win(self):
@@ -27,7 +26,7 @@ class CustomClient(discord.Client):
         smart_move_col = -1
 
         for row in range(3):
-            if self.c[row][0] == "0" and self.c[row][1] == '0' and self.c[row][2] == '.' :
+            if self.c[row][0] == "0" and self.c[row][1] == '0' and self.c[row][2] == '.' : 
                 smart_move_row = row + 1
                 smart_move_col = 3
             
@@ -40,8 +39,8 @@ class CustomClient(discord.Client):
         for dia in range(3):
             if self.c[dia][dia] == 'x':
                 count_dia += 1
-            if self.c[dia][dia] == ".":
-                dia_gde_tochka = dia
+            if self.c[dia][dia] == "-":
+                dia_gde_tochka = dia + 1
         
         if count_dia == 2 and dia_gde_tochka != -1:
             return(dia_gde_tochka, dia_gde_tochka)
@@ -53,9 +52,9 @@ class CustomClient(discord.Client):
         for dia in range(3):
             if self.c[dia][dia1] == 'x':
                 count_dia += 1
-            if self.c[dia][dia1] == ".":
-                dia_gde_tochka = dia
-                dia_gde_tochka1 = dia1
+            if self.c[dia][dia1] == "-":
+                dia_gde_tochka = dia + 1
+                dia_gde_tochka1 = dia1 + 1
             dia1 -= 1
 
         if count_dia == 2 and dia_gde_tochka != -1:
@@ -121,14 +120,14 @@ class CustomClient(discord.Client):
                 cords22 = 0
             
             if col == 3 and count0 == 1:
-                cords_real1 = cords01  
+                cords_real1 = cords01 + 1
                 cords_real2 = cords02 
             if col == 3 and count1 == 1:
-                cords_real1 = cords21  
-                cords_real2 = cords22   
+                cords_real1 = cords21 + 1
+                cords_real2 = cords22 + 1 
             if col == 3 and count2 == 1:
-                cords_real1 = cords21  
-                cords_real2 = cords22   
+                cords_real1 = cords21 + 1 
+                cords_real2 = cords22 + 1  
         return (cords_real1, cords_real2)
 
     async def bot_move(self, message):
@@ -148,11 +147,14 @@ class CustomClient(discord.Client):
                 else:
                     bot_stroka = smart_move[0] -1 
                     bot_kolonka = smart_move[1] -1
+            else: 
+                bot_stroka = smart_move [0] -1
+                bot_kolonka = smart_move [1] -1
         else:
             bot_stroka = smart_move[0] -1
             bot_kolonka = smart_move[1] -1
                 
-        if self.c[bot_stroka][bot_kolonka] == ".":
+        if self.c[bot_stroka][bot_kolonka] == "-":
             self.c[bot_stroka][bot_kolonka] = "0"
             await self.x0in_row(message, "0")
             await self.x0change_turn(message)
@@ -172,7 +174,9 @@ class CustomClient(discord.Client):
     async def x0game(self, message):
 
         if self.game_over == True:
+            self.c = [["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]
             return
+    
 
 
         if message.content.startswith("/x0-move"):
@@ -181,12 +185,12 @@ class CustomClient(discord.Client):
             stroka = int(result[1]) - 1
             kolonka = int(result[2]) - 1
             x_or_0 = self.x0_turn
-            if self.c[stroka][kolonka] == ".":
+            if self.c[stroka][kolonka] == "-":
                 self.c[stroka][kolonka] = x_or_0
                 await self.x0in_row(message, x_or_0)
                 await self.x0change_turn(message)
                 if not self.game_over:
-                    await message.channel.send("Ходит " + self.x0_turn + ".")
+                    await message.channel.send("Ходит " + self.x0_turn + "-")
             else:
                 await channel.send("Жулик! Не жульничай!")
             await self.xprint(message)
@@ -196,7 +200,7 @@ class CustomClient(discord.Client):
         full_strok = 0
         full_col = 0
         for full in range(9):
-            if self.c[full_strok][full_col] != ".":
+            if self.c[full_strok][full_col] != "-":
                 full_count += 1
             if full_col == 2:
                 full_col -= 3
@@ -242,7 +246,7 @@ class CustomClient(discord.Client):
             channel = message.channel
             result = message.content.split()
             await channel.send("Starting new game players: Korveee and " + result[1])
-            await message.channel.send("Ходит " + self.x0_turn + ".")
+            await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
         if message.content.startswith("/x0-start pvp"):
             self.game_over = False
@@ -251,7 +255,7 @@ class CustomClient(discord.Client):
             await channel.send(
                 "starting new game players: " + result[1] + " and " + result[2]
             )
-            await message.channel.send("Ходит " + self.x0_turn + ".")
+            await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
         
     async def on_message(self, message):
@@ -262,7 +266,7 @@ class CustomClient(discord.Client):
         await self.x0start(message)
         await self.x0game(message)
 
-        number,play = await game(message,self.play,self.number)
+        (number) = await game(message,self.number)
 
         if message.content.startswith("/help"):
             channel = message.channel
