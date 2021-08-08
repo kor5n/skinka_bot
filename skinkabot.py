@@ -40,7 +40,7 @@ class CustomClient(discord.Client):
             if self.c[dia][dia] == 'x':
                 count_dia += 1
             if self.c[dia][dia] == "-":
-                dia_gde_tochka = dia + 1
+                dia_gde_tochka = dia 
         
         if count_dia == 2 and dia_gde_tochka != -1:
             return(dia_gde_tochka, dia_gde_tochka)
@@ -53,8 +53,8 @@ class CustomClient(discord.Client):
             if self.c[dia][dia1] == 'x':
                 count_dia += 1
             if self.c[dia][dia1] == "-":
-                dia_gde_tochka = dia + 1
-                dia_gde_tochka1 = dia1 + 1
+                dia_gde_tochka = dia 
+                dia_gde_tochka1 = dia1 
             dia1 -= 1
 
         if count_dia == 2 and dia_gde_tochka != -1:
@@ -120,14 +120,14 @@ class CustomClient(discord.Client):
                 cords22 = 0
             
             if col == 3 and count0 == 1:
-                cords_real1 = cords01 + 1
+                cords_real1 = cords01 
                 cords_real2 = cords02 
             if col == 3 and count1 == 1:
-                cords_real1 = cords21 + 1
-                cords_real2 = cords22 + 1 
+                cords_real1 = cords21 
+                cords_real2 = cords22 
             if col == 3 and count2 == 1:
-                cords_real1 = cords21 + 1 
-                cords_real2 = cords22 + 1  
+                cords_real1 = cords21 
+                cords_real2 = cords22  
         return (cords_real1, cords_real2)
 
     async def bot_move(self, message):
@@ -282,7 +282,7 @@ class CustomClient(discord.Client):
 
     async def on_member_join(self, member):
         await member.send(f"Hello, {member.name}!")
-        await member.send("Welcome to our programming server!")
+        await member.send("Welcome to our server!")
 
     async def on_ready(self):
         print(f"{self.user} has connected to Discord!")
