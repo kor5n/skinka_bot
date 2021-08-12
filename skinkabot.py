@@ -18,6 +18,6 @@ intents = discord.Intents.default()
 intents.members = True
 
 client = CustomClient(intents=intents)
-client.run("ODAyNTAzOTMyMjQ1MDQ5MzU0.YAwMBw.JAWeolGKBzQHXM9Upne21UlwhF0")
+client.run("TOKEN")
 
 
