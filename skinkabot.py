@@ -4,6 +4,7 @@ import random
 import discord
 from dotenv import load_dotenv
 from guessing_game import game
+from discord_components import DiscordComponents, Button, ButtonStyle
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -20,6 +21,9 @@ class CustomClient(discord.Client):
         self.x0_turn = "x"
         self.player_bot = False
         self.number = 50.0
+        self.villains = ["Porky","Doki-Doki","stinky Peet","Super bam","miss Mil","lolik","mr J","grecnij"]
+        self.shops = ["магазин щитов","магазин зелий"]
+        self.adventures = ["в пещеру","на далекие острова","в арктику"]
 
     def smart_win(self):
         smart_move_row = -1
@@ -31,7 +35,32 @@ class CustomClient(discord.Client):
                 smart_move_col = 3
             
         return (smart_move_row, smart_move_col)
-    
+    def smart_defence_vertical(self):
+        cord = 0
+        cord1 = 0
+        for ver in range(9):
+            if self.c[cord][cord1] == "-":
+                if cord1 == 0:
+                    count0 + 1
+                    tochka0 = cord
+                    tochka1 = cord1
+                elif cord1 == 1:
+                    count1 + 1
+                    tochka2 = cord
+                    tochka3 = cord1
+                if cord1 == 2:
+                    count2 + 1
+                    tochka4 = cord
+                    tochka5 = cord1
+            if cord != 2:
+                cord += 1
+            if cord >= 2:
+                cord -= cord
+                cord1 += 1
+            if count0 == 1:
+                return(tochka0, tochka1)
+            if count1 == 1:
+                return(tochka2, tochka3)
     def smart_defence_diagonal(self):
         count_dia = 0
         dia_gde_tochka = -1
@@ -92,7 +121,7 @@ class CustomClient(discord.Client):
             # . . x
             # x . x
             # x . x
-            if self.c[strok][col] == '.':
+            if self.c[strok][col] == '-':
                 if strok == 0:
                     count0 += 1 
                     cords01 = 0
@@ -110,14 +139,14 @@ class CustomClient(discord.Client):
                 strok -= 3
             strok += 1
             if col == 3 and count0 == 2 or count0 == 0 or count0 == 3:
-                cords01 = 0
-                cords02 = 0
+                cords01 = -1
+                cords02 = -1
             if col == 3 and count1 == 2 or count1 == 0 or count1 == 3:
-                cords11 = 0
-                cords12 = 0
+                cords11 = -1
+                cords12 = -1
             if col == 3 and count2 == 2 or count2 == 0 or count2 == 3:
-                cords21 = 0
-                cords22 = 0
+                cords21 = -1
+                cords22 = -1
             
             if col == 3 and count0 == 1:
                 cords_real1 = cords01 
@@ -257,6 +286,17 @@ class CustomClient(discord.Client):
             )
             await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
+
+    async def Shop(self, message):
+        channel = message.channel
+        await channel.send(
+            embed = discord.Embed(title = "в какой магазин отправимся?"),
+                components=[
+                    Button(label= self.shops[0], style = ButtonStyle.red, emoji = "🛡"),
+                    Button(label= self.shops[1], style = ButtonStyle.green, emoji = "🧃")
+                ]
+            )
+
         
     async def on_message(self, message):
 
@@ -268,16 +308,49 @@ class CustomClient(discord.Client):
 
         (number) = await game(message,self.number)
 
+        
+
+        
+
         if message.content.startswith("/help"):
             channel = message.channel
             await channel.send(
-                message.author + "Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['.', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
+                message.author + "Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n (помогал @Fordocront)! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['-', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
             )
         if message.content.startswith("/привет"):
             channel = message.channel
             await channel.send(
                 "Привет я Korvee давай дружить?"
             )
+
+        if message.content.startswith("/команды"):
+            channel = message.channel
+            await channel.send(
+                
+                embed = discord.Embed(title = "вы начали игру!"),
+                components=[
+                    Button(label= "Дратся", style = ButtonStyle.red, emoji = "👿"),
+                    Button(label= "пойти в магазин", style = ButtonStyle.green, emoji = "🛍"),
+                    Button(label= "отправится в приключения", style = ButtonStyle.blue, emoji = "🏝")
+
+                ]
+            )
+            response = await bot.wait_for("button_click")
+            if response.channel == channel:
+                if (response.component.label == "Дратся"):
+                    await response.respond(content = "Вы будете дратся с " + random.choice(self.villains))
+                
+                elif (response.component.label == "пойти в магазин"):
+                    channel = message.channel
+                    await self.Shop(message)
+                        
+                    
+
+                
+                elif (response.component.label == "отправится в приключения"):
+                    await response.respond(content = "выберите куда отправится")
+
+
     
 
     async def on_member_join(self, member):
@@ -285,6 +358,7 @@ class CustomClient(discord.Client):
         await member.send("Welcome to our server!")
 
     async def on_ready(self):
+        DiscordComponents(bot)
         print(f"{self.user} has connected to Discord!")
         for server in self.guilds:
             print(server.name)
