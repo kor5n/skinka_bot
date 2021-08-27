@@ -3,9 +3,8 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
-from guessing_game import game
 from discord_components import DiscordComponents, Button, ButtonStyle
-
+import game_mind
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -20,7 +19,6 @@ class CustomClient(discord.Client):
         self.game_over = False
         self.x0_turn = "x"
         self.player_bot = False
-        self.number = 50.0
         self.villains = ["Porky","Doki-Doki","stinky Peet","Super bam","miss Mil","lolik","mr J","grecnij"]
         self.shops = ["магазин щитов","магазин зелий"]
         self.adventures = ["в пещеру","на далекие острова","в арктику"]
@@ -36,10 +34,21 @@ class CustomClient(discord.Client):
             
         return (smart_move_row, smart_move_col)
     def smart_defence_vertical(self):
+        cords_real1 = -1
+        cords_real2 = -1
+        tochka5 = 0
+        tochka2 = 0 
+        tochka3 = 0
+        tochka4 = 0
+        tochka0 = 0
+        tochka1 = 0
+        count2 = 0
+        count1 = 0
+        count0 = 0
         cord = 0
         cord1 = 0
         for ver in range(9):
-            if self.c[cord][cord1] == "-":
+            if self.c[cord1][cord] == '-':
                 if cord1 == 0:
                     count0 + 1
                     tochka0 = cord
@@ -52,15 +61,30 @@ class CustomClient(discord.Client):
                     count2 + 1
                     tochka4 = cord
                     tochka5 = cord1
-            if cord != 2:
-                cord += 1
-            if cord >= 2:
-                cord -= cord
+            if cord == 2:
                 cord1 += 1
-            if count0 == 1:
-                return(tochka0, tochka1)
-            if count1 == 1:
-                return(tochka2, tochka3)
+                cord -= 3
+            cord += 1
+            if cord1 == 3 and count0 == 2 or count0 == 0 or count0 == 3:
+                tochka0 = -1
+                tochka1 = -1
+            if cord1 == 3 and count1 == 2 or count1 == 0 or count1 == 3:
+                tochka2 = -1
+                tochka3 = -1
+            if cord1 == 3 and count2 == 2 or count2 == 0 or count2 == 3:
+                tochka4 = -1
+                tochka5 = -1
+            
+            if cord1 == 3 and count0 == 1:
+                cords_real1 = tochka0 
+                cords_real2 = tochka1 
+            if cord1 == 3 and count1 == 1:
+                cords_real1 = tochka2 
+                cords_real2 = tochka3 
+            if cord1 == 3 and count2 == 1:
+                cords_real1 = tochka4 
+                cords_real2 = tochka5  
+        return (cords_real1, cords_real2)
     def smart_defence_diagonal(self):
         count_dia = 0
         dia_gde_tochka = -1
@@ -165,14 +189,19 @@ class CustomClient(discord.Client):
             return
         
         smart_move = self.smart_win()
-
+    
         if smart_move[0] == -1 and smart_move[1] == -1:
             smart_move = self.smart_defence()
             if smart_move[0] == -1 and smart_move[1] == -1:
                 smart_move = self.smart_defence_diagonal()
-                if smart_move[0] == -1 and smart_move[1] == -1:    
-                    bot_stroka = random.randint(0, 2)
-                    bot_kolonka = random.randint(0, 2)
+                if smart_move[0] == -1 and smart_move[1] == -1:
+                    smart_move = self.smart_defence_vertical()
+                    if smart_move[0] == -1 and smart_move[1]:    
+                        bot_stroka = random.randint(0, 2)
+                        bot_kolonka = random.randint(0, 2)
+                    else: 
+                        bot_stroka = smart_move[0] -1 
+                        bot_kolonka = smart_move[1] -1
                 else:
                     bot_stroka = smart_move[0] -1 
                     bot_kolonka = smart_move[1] -1
@@ -287,6 +316,37 @@ class CustomClient(discord.Client):
             await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
 
+
+
+
+        
+        
+
+
+    async def ShopChoose(self, message, shop):
+        channel = message.channel
+        if (shop == 0):
+            await channel.send(
+                embed = discord.Embed(title = "выбирайте предметы:"),
+                    components=[
+                        Button(label= "ледяной щит 50$", style = ButtonStyle.blue, emoji = "🧊"),
+                        Button(label= "огняный щит 100$", style = ButtonStyle.red, emoji = "🔥"),
+                        Button(label= "денежный щит 200$", style = ButtonStyle.green, emoji = "💸"),
+                        Button(label= "щит котов 350$", style = ButtonStyle.blue, emoji = "🐱"),
+                        Button(label= "щит древней сосиски 500$", style = ButtonStyle.red, emoji = "🌭")
+                    ]
+                )
+        elif (shop == 1):
+            await channel.send(
+                embed = discord.Embed(title = "выбирайте предметы:"),
+                    components=[
+                        Button(label= "+ жизни 20$", style = ButtonStyle.green, emoji = "❤"),
+                        Button(label= "+ атака 50$", style = ButtonStyle.red, emoji = "⚔"),
+                        Button(label= "+ денег с врагов 200$", style = ButtonStyle.blue, emoji = "💸"),
+                        Button(label= "+ опыта с врагов 350$", style = ButtonStyle.green, emoji = "🧬")
+                    ]
+                )
+
     async def Shop(self, message):
         channel = message.channel
         await channel.send(
@@ -296,32 +356,38 @@ class CustomClient(discord.Client):
                     Button(label= self.shops[1], style = ButtonStyle.green, emoji = "🧃")
                 ]
             )
+        response = await bot.wait_for("button_click")
+        if response.channel == channel:
+            if (response.component.label == "магазин щитов"):
+                await self.ShopChoose(message,0)
+                
+            elif (response.component.label == "магазин зелий"):
+                await self.ShopChoose(message,1)
 
         
     async def on_message(self, message):
 
-        if self.user == message.author:
-            return
 
         await self.x0start(message)
         await self.x0game(message)
 
-        (number) = await game(message,self.number)
 
         
 
         
 
-        if message.content.startswith("/help"):
-            channel = message.channel
-            await channel.send(
-                message.author + "Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n (помогал @Fordocront)! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['-', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
-            )
+#"Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n (помогал @Fordocront)! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['-', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
+
         if message.content.startswith("/привет"):
             channel = message.channel
             await channel.send(
                 "Привет я Korvee давай дружить?"
             )
+
+        if message.content.startswith("/reg"):
+            channel = message.channel
+            game_mind.Save(message.author,0,0,0,0,0)
+
 
         if message.content.startswith("/команды"):
             channel = message.channel
@@ -329,7 +395,7 @@ class CustomClient(discord.Client):
                 
                 embed = discord.Embed(title = "вы начали игру!"),
                 components=[
-                    Button(label= "Дратся", style = ButtonStyle.red, emoji = "👿"),
+                    Button(label= "Дратся", style = ButtonStyle.red, emoji = "⚔"),
                     Button(label= "пойти в магазин", style = ButtonStyle.green, emoji = "🛍"),
                     Button(label= "отправится в приключения", style = ButtonStyle.blue, emoji = "🏝")
 
