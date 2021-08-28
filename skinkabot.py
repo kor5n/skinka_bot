@@ -4,7 +4,6 @@ import random
 import discord
 from dotenv import load_dotenv
 from discord_components import DiscordComponents, Button, ButtonStyle
-import game_mind
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -13,7 +12,7 @@ intents.members = True
 
 
 class CustomClient(discord.Client):
-    def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]):
+    def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]], nickname=[]):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
         self.game_over = False
@@ -22,12 +21,26 @@ class CustomClient(discord.Client):
         self.villains = ["Porky","Doki-Doki","stinky Peet","Super bam","miss Mil","lolik","mr J","grecnij"]
         self.shops = ["магазин щитов","магазин зелий"]
         self.adventures = ["в пещеру","на далекие острова","в арктику"]
+        self.nickname = nickname 
+        self.cash = []
+        self.xp = []
+        self.weapons = []
+        self.shields = []
+        self.potions = []
+
+    def Save(self,nickname1,cash1,xp1,weapons1,shields1,potions1):
+            self.nickname.append(nickname1)
+            self.cash.append(cash1)
+            self.xp.append(xp1)
+            self.weapons.append(weapons1)
+            self.potions.append(potions1)
+            self.shields.append(shields1)
 
     def smart_win(self):
         smart_move_row = -1
         smart_move_col = -1
 
-        for row in range(3):
+        for row in range(2+1):
             if self.c[row][0] == "0" and self.c[row][1] == '0' and self.c[row][2] == '.' : 
                 smart_move_row = row + 1
                 smart_move_col = 3
@@ -323,7 +336,7 @@ class CustomClient(discord.Client):
         
 
 
-    async def ShopChoose(self, message, shop):
+    async def ShopChoose(self, message, shop,findNickname):
         channel = message.channel
         if (shop == 0):
             await channel.send(
@@ -347,7 +360,7 @@ class CustomClient(discord.Client):
                     ]
                 )
 
-    async def Shop(self, message):
+    async def Shop(self, message,findNickname):
         channel = message.channel
         await channel.send(
             embed = discord.Embed(title = "в какой магазин отправимся?"),
@@ -359,10 +372,10 @@ class CustomClient(discord.Client):
         response = await bot.wait_for("button_click")
         if response.channel == channel:
             if (response.component.label == "магазин щитов"):
-                await self.ShopChoose(message,0)
+                await self.ShopChoose(message,0,findNickname)
                 
             elif (response.component.label == "магазин зелий"):
-                await self.ShopChoose(message,1)
+                await self.ShopChoose(message,1,findNickname)
 
         
     async def on_message(self, message):
@@ -385,36 +398,64 @@ class CustomClient(discord.Client):
             )
 
         if message.content.startswith("/reg"):
-            channel = message.channel
-            game_mind.Save(message.author,0,0,0,0,0)
+            self.Save(message.author,0,0,0,0,0)
+            print(self.nickname[0])
+            
+           
 
 
         if message.content.startswith("/команды"):
             channel = message.channel
-            await channel.send(
-                
-                embed = discord.Embed(title = "вы начали игру!"),
-                components=[
-                    Button(label= "Дратся", style = ButtonStyle.red, emoji = "⚔"),
-                    Button(label= "пойти в магазин", style = ButtonStyle.green, emoji = "🛍"),
-                    Button(label= "отправится в приключения", style = ButtonStyle.blue, emoji = "🏝")
+            go = False
+            findNickname = "f"
 
-                ]
-            )
-            response = await bot.wait_for("button_click")
-            if response.channel == channel:
-                if (response.component.label == "Дратся"):
-                    await response.respond(content = "Вы будете дратся с " + random.choice(self.villains))
+            for message.author in self.nickname:
+                if message.author in self.nickname:
+                    findNickname = message.author
+                    go = True
+                    
+                else:
+                    go = False
                 
-                elif (response.component.label == "пойти в магазин"):
-                    channel = message.channel
-                    await self.Shop(message)
+            if (go == True):
+                print(findNickname)
+
+                await channel.send(
+                    
+                    embed = discord.Embed(title = "вы начали игру!"),
+                    components=[
+                        Button(label= "Дратся", style = ButtonStyle.red, emoji = "⚔"),
+                        Button(label= "пойти в магазин", style = ButtonStyle.green, emoji = "🛍"),
+                        Button(label= "отправится в приключения", style = ButtonStyle.blue, emoji = "🏝")
+
+                    ]
+                )
+                response = await bot.wait_for("button_click")
+                if response.channel == channel:
+                    if (response.component.label == "Дратся"):
+                        await response.respond(content = "Вы будете дратся с " + random.choice(self.villains))
+                    
+                    elif (response.component.label == "пойти в магазин"):
+                        channel = message.channel
+                        await self.Shop(message,findNickname)
+                            
                         
+
+                    
+                    elif (response.component.label == "отправится в приключения"):
+                        await response.respond(content = "выберите куда отправится")
+
+                
+
+            else:
+                await channel.send(
+                    
+                    embed = discord.Embed(title = "вы не зарегестрированы использйте \n/reg")
                     
 
-                
-                elif (response.component.label == "отправится в приключения"):
-                    await response.respond(content = "выберите куда отправится")
+                    
+                )
+
 
 
     
