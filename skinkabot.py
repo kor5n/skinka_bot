@@ -135,7 +135,7 @@ class CustomClient(discord.Client):
         if message.content.startswith("/x0-start"):
             self.game_over = False
             self.player_bot = True
-            channel = message.channel
+            channel = message.channel       
             result = message.content.split()
             await channel.send("Starting new game players: Korveee and " + result[1])
             await message.channel.send("Ходит " + self.x0_turn + "-")
@@ -221,8 +221,13 @@ class CustomClient(discord.Client):
         if message.content.startswith("/reg"):
             self.Save(message.author,0,0,0,0,0)
             print(self.nickname[0])
-            
-           
+            #about = {
+            #    nickname: self.nickname[0], 
+            #    level: 1,
+            #    weapons: ["base sword"] 
+            #}
+            #with open ("save_ds.game.json", "w") as file
+            #    json.dump(about, file, indent=2)
 
 
         if message.content.startswith("/команды"):
@@ -294,7 +299,7 @@ class CustomClient(discord.Client):
                 print(channel.name)
             for member in server.members:
                 print(member.name)
-
+    
 
 intents = discord.Intents.default()
 intents.members = True
