@@ -221,13 +221,13 @@ class CustomClient(discord.Client):
         if message.content.startswith("/reg"):
             self.Save(message.author,0,0,0,0,0)
             print(self.nickname[0])
-            #about = {
-            #    nickname: self.nickname[0], 
-            #    level: 1,
-            #    weapons: ["base sword"] 
-            #}
-            #with open ("save_ds.game.json", "w") as file
-            #    json.dump(about, file, indent=2)
+            about = {
+                nickname: self.nickname, 
+                level: 1,
+                weapons: ["base sword"] 
+            }
+            with open ("save_ds.game.json", "w") as file:
+                json.dump(about, file, indent=2)
 
 
         if message.content.startswith("/команды"):
