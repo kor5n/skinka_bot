@@ -1,4 +1,5 @@
 # skinkabot.py
+import json
 import os
 import random
 import discord
@@ -12,7 +13,7 @@ intents.members = True
 
 
 class CustomClient(discord.Client):
-    def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]], nickname=[]):
+    def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]):
         super(CustomClient, self).__init__(intents=intents)
         self.c = c
         self.game_over = False
@@ -21,20 +22,36 @@ class CustomClient(discord.Client):
         self.villains = ["Porky","Doki-Doki","stinky Peet","Super bam","miss Mil","lolik","mr J","grecnij"]
         self.shops = ["магазин щитов","магазин зелий"]
         self.adventures = ["в пещеру","на далекие острова","в арктику"]
-        self.nickname = nickname 
         self.cash = []
         self.xp = []
         self.weapons = []
         self.shields = []
         self.potions = []
+    def if_reg(self,nickname1):
+        find_nick = None
+        with open ("save_ds_game.json", "r") as file:
+            nicknames = json.load(file)
+            if len(nicknames) == 0:
+                self.save(str(nickname1),50,0,0,0,0)
+                return False
+            elif nicknames['nickname'] == str(nickname1) :
+                return True
 
-    def Save(self,nickname1,cash1,xp1,weapons1,shields1,potions1):
-            self.nickname.append(nickname1)
-            self.cash.append(cash1)
-            self.xp.append(xp1)
-            self.weapons.append(weapons1)
-            self.potions.append(potions1)
-            self.shields.append(shields1)
+            else:
+                self.save(str(nickname1),50,0,0,0,0)
+                return False
+    def save(self,nickname1,cash1,xp1,weapons1,shields1,potions1):
+        
+        about = {
+        'nickname': nickname1,
+        'cash':cash1,
+        'xp':xp1,
+        'weapons': weapons1,
+        'potions': potions1,
+        'shields': shields1
+        }
+        with open ("save_ds_game.json", "a") as file:
+            x = json.dump(about, file)
 
     
     async def bot_move(self, message):
@@ -71,7 +88,7 @@ class CustomClient(discord.Client):
     
 
 
-        if message.content.startswith("/x0-move"):
+        if message.content.startswith("-x0-move"):
             channel = message.channel
             result = message.content.split()
             stroka = int(result[1]) - 1
@@ -109,7 +126,7 @@ class CustomClient(discord.Client):
                 self.game_over = True
         for collon in range(3):
             if (
-                self.c[0][collon] == x_or_0
+                self.c[0][collon] == x_or_0 
                 and self.c[1][collon] == x_or_0
                 and self.c[2][collon] == x_or_0
             ):
@@ -132,7 +149,7 @@ class CustomClient(discord.Client):
         
             
     async def x0start(self, message):
-        if message.content.startswith("/x0-start"):
+        if message.content.startswith("-x0-start"):
             self.game_over = False
             self.player_bot = True
             channel = message.channel       
@@ -140,7 +157,7 @@ class CustomClient(discord.Client):
             await channel.send("Starting new game players: Korveee and " + result[1])
             await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
-        if message.content.startswith("/x0-start pvp"):
+        if message.content.startswith("-x0-start pvp"):
             self.game_over = False
             channel = message.channel
             result = message.content.split()
@@ -212,25 +229,23 @@ class CustomClient(discord.Client):
 
 #"Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n (помогал @Fordocront)! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['-', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
 
-        if message.content.startswith("/привет"):
+        if message.content.startswith("-привет"):
             channel = message.channel
             await channel.send(
                 "Привет я Korvee давай дружить?"
             )
 
-        if message.content.startswith("/reg"):
-            self.Save(message.author,0,0,0,0,0)
-            print(self.nickname[0])
-            about = {
-                nickname: self.nickname, 
-                level: 1,
-                weapons: ["base sword"] 
-            }
-            with open ("save_ds.game.json", "w") as file:
-                json.dump(about, file, indent=2)
+        if message.content.startswith("-reg"):
+            channel = message.channel
+            #self.Save(str(message.author),50,0,0,0,0)
+            if (self.if_reg( message.author)):
+                await channel.send('вы уже зареганы!!!!!!!\n аааааа я злой!!!!1111!! 👿')
+            else: 
+                await channel.send(embed = discord.Embed(title = "Вы зарегестрировались", description = "Вам выдан баланс в 50 монет! \nЗагляните в магазин (-ShopChoose) чтобы их потратить 💵"))
+            
 
 
-        if message.content.startswith("/команды"):
+        if message.content.startswith("-команды"):
             channel = message.channel
             go = False
             findNickname = "f"
@@ -276,7 +291,7 @@ class CustomClient(discord.Client):
             else:
                 await channel.send(
                     
-                    embed = discord.Embed(title = "вы не зарегестрированы использйте \n/reg")
+                    embed = discord.Embed(title = "вы не зарегестрированы использйте \n-reg")
                     
 
                     
