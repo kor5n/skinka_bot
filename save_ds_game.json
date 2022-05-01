@@ -1,1 +1,12 @@
-{"nickname": "Kor5n#8722", "cash": 50, "xp": 0, "weapons": 0, "potions": 0, "shields": 0} 
+{"players":
+    {"Kor5n#8722": 
+        {
+            "cash": 50, 
+            "xp": 0, 
+            "weapons": 0, 
+            "potions": 0, 
+            "shields": 0
+        }
+    }
+    
+}
