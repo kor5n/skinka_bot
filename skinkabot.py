@@ -18,6 +18,6 @@ intents = discord.Intents.default()
 intents.members = True
 
 client = CustomClient(intents=intents)
-client.run("TOKEN")
+client.run("TOKEN")#your discord bot's token has to be here
 
 
