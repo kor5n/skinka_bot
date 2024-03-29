@@ -1,13 +1,6 @@
 #starer bot
-
 import os
-
 import discord
-
-
-
-intents = discord.Intents()
-intents.members = True
 
 class CustomClient(discord.Client):
 
