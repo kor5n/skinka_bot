@@ -13,6 +13,7 @@ intents.members = True
 class CustomClient(discord.Client):
     def __init__(self, intents, c=[["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]):
         super(CustomClient, self).__init__(intents=intents)
+        self.x0_players = []
         self.c = c
         self.game_over = False
         self.x0_turn = "x"
@@ -93,14 +94,21 @@ class CustomClient(discord.Client):
                 kolonka = int(result[2]) - 1
                 x_or_0 = self.x0_turn
                 if self.c[stroka][kolonka] == "-":
-                    self.c[stroka][kolonka] = x_or_0
-                    await self.x0in_row(message, x_or_0)
-                    await self.x0change_turn(message)
-                    if not self.game_over:
-                        await message.channel.send("Ходит " + self.x0_turn + "-")
+                    print(message.author.id, self.x0_players[0][2:-1], self.x0_players[1][2:-1])
+                    print(self.x0_turn)
+                    print(str(message.author.id) == str(self.x0_players[0][2:-1]))
+                    if self.x0_turn == "x" and str(message.author.id) == str(self.x0_players[0][2:-1]) or self.x0_turn == "0" and str(message.author.id) == str(self.x0_players[1][2:-1]):
+                        self.c[stroka][kolonka] = x_or_0
+                        await self.x0in_row(message, x_or_0)
+                        await self.x0change_turn(message)
+                        if not self.game_over:
+                            await message.channel.send("Ходит " + self.x0_turn + "-")
+                    else:
+                        await channel.send("Жулик! Не жульничай!")
                 else:
                     await channel.send("Жулик! Не жульничай!")
-                await self.xprint(message)
+                if not self.game_over:
+                    await self.xprint(message)
 
     async def x0in_row(self, message, x_or_0):
         full_count = 0
@@ -134,33 +142,47 @@ class CustomClient(discord.Client):
         if self.c[0][2] == x_or_0 and self.c[1][1] == x_or_0 and self.c[2][0] == x_or_0:
             self.game_over = True
         if self.game_over == True:
+            await self.xprint(message)
             channel = message.channel
-            await channel.send(
-                "Игрок игравший за " + x_or_0 + " выиграл! Игра окончена."
-            )
+            self.x0_turn = "x"
+            if len(self.x0_players) == 2:
+                if x_or_0 == "x":
+                    winner = self.x0_players[0]
+                else:
+                    winner = self.x0_players[1]
+                await channel.send(
+                    "Игрок " + winner+ " игравший за " + x_or_0 + " выиграл! Игра окончена."
+                )
+                self.x0_players = []
+            else:
+                await channel.send(
+                    "Игрок игравший за " + x_or_0 + " выиграл! Игра окончена."
+                )
 
     async def xprint(self, message):
         channel = message.channel
         await channel.send(self.c[0])
         await channel.send(self.c[1])
         await channel.send(self.c[2])
-        
-            
+    
     async def x0start(self, message):
-        if message.content.startswith("-x0-start"):
+        if message.content.startswith("-x0-start bot"):
             self.game_over = False
             self.player_bot = True
             channel = message.channel       
             result = message.content.split()
-            await channel.send("Starting new game players: Korveee and " + result[1])
+            await channel.send("Starting new game players: Korveee and " + result[2])
             await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
         if message.content.startswith("-x0-start pvp"):
             self.game_over = False
             channel = message.channel
             result = message.content.split()
+            self.x0_players.append(result[2])
+            self.x0_players.append(result[3])
+            print(self.x0_players[0], self.x0_players[1])
             await channel.send(
-                "starting new game players: " + result[1] + " and " + result[2]
+                "starting new game players: " + result[2] + " and " + result[3]
             )
             await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
