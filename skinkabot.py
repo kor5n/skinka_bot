@@ -4,11 +4,10 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
-from discord_components import DiscordComponents, Button, ButtonStyle
+from llama_cpp import Llama
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
 
-intents = discord.Intents()
+intents = discord.Intents.all()
 intents.members = True
 
 
@@ -87,22 +86,22 @@ class CustomClient(discord.Client):
             return
     
 
-
-        if message.content.startswith("-x0-move"):
-            channel = message.channel
-            result = message.content.split()
-            stroka = int(result[1]) - 1
-            kolonka = int(result[2]) - 1
-            x_or_0 = self.x0_turn
-            if self.c[stroka][kolonka] == "-":
-                self.c[stroka][kolonka] = x_or_0
-                await self.x0in_row(message, x_or_0)
-                await self.x0change_turn(message)
-                if not self.game_over:
-                    await message.channel.send("Ходит " + self.x0_turn + "-")
-            else:
-                await channel.send("Жулик! Не жульничай!")
-            await self.xprint(message)
+        else:
+            if message.content.startswith("-x0-move"):
+                channel = message.channel
+                result = message.content.split()
+                stroka = int(result[1]) - 1
+                kolonka = int(result[2]) - 1
+                x_or_0 = self.x0_turn
+                if self.c[stroka][kolonka] == "-":
+                    self.c[stroka][kolonka] = x_or_0
+                    await self.x0in_row(message, x_or_0)
+                    await self.x0change_turn(message)
+                    if not self.game_over:
+                        await message.channel.send("Ходит " + self.x0_turn + "-")
+                else:
+                    await channel.send("Жулик! Не жульничай!")
+                await self.xprint(message)
 
     async def x0in_row(self, message, x_or_0):
         full_count = 0
@@ -180,21 +179,21 @@ class CustomClient(discord.Client):
             await channel.send(
                 embed = discord.Embed(title = "выбирайте предметы:"),
                     components=[
-                        Button(label= "ледяной щит 50$", style = ButtonStyle.blue, emoji = "🧊"),
-                        Button(label= "огняный щит 100$", style = ButtonStyle.red, emoji = "🔥"),
-                        Button(label= "денежный щит 200$", style = ButtonStyle.green, emoji = "💸"),
-                        Button(label= "щит котов 350$", style = ButtonStyle.blue, emoji = "🐱"),
-                        Button(label= "щит древней сосиски 500$", style = ButtonStyle.red, emoji = "🌭")
+                        discord.Button(label= "ледяной щит 50$", style = discord.ButtonStyle.blue, emoji = "🧊"),
+                        discord.Button(label= "огняный щит 100$", style = discord.ButtonStyle.red, emoji = "🔥"),
+                        discord.Button(label= "денежный щит 200$", style = discord.ButtonStyle.green, emoji = "💸"),
+                        discord.Button(label= "щит котов 350$", style = discord.ButtonStyle.blue, emoji = "🐱"),
+                        discord.Button(label= "щит древней сосиски 500$", style = discord.ButtonStyle.red, emoji = "🌭")
                     ]
                 )
         elif (shop == 1):
             await channel.send(
                 embed = discord.Embed(title = "выбирайте предметы:"),
                     components=[
-                        Button(label= "+ жизни 20$", style = ButtonStyle.green, emoji = "❤"),
-                        Button(label= "+ атака 50$", style = ButtonStyle.red, emoji = "⚔"),
-                        Button(label= "+ денег с врагов 200$", style = ButtonStyle.blue, emoji = "💸"),
-                        Button(label= "+ опыта с врагов 350$", style = ButtonStyle.green, emoji = "🧬")
+                        discord.Button(label= "+ жизни 20$", style = discord.ButtonStyle.green, emoji = "❤"),
+                        discord.Button(label= "+ атака 50$", style = discord.ButtonStyle.red, emoji = "⚔"),
+                        discord.Button(label= "+ денег с врагов 200$", style = discord.ButtonStyle.blue, emoji = "💸"),
+                        discord.Button(label= "+ опыта с врагов 350$", style = discord.ButtonStyle.green, emoji = "🧬")
                     ]
                 )
 
@@ -203,8 +202,8 @@ class CustomClient(discord.Client):
         await channel.send(
             embed = discord.Embed(title = "в какой магазин отправимся?"),
                 components=[
-                    Button(label= self.shops[0], style = ButtonStyle.red, emoji = "🛡"),
-                    Button(label= self.shops[1], style = ButtonStyle.green, emoji = "🧃")
+                    discord.Button(label= self.shops[0], style = discord.ButtonStyle.red, emoji = "🛡"),
+                    discord.Button(label= self.shops[1], style = discord.ButtonStyle.green, emoji = "🧃")
                 ]
             )
         response = await bot.wait_for("button_click")
@@ -228,7 +227,6 @@ class CustomClient(discord.Client):
         
 
 #"Привет меня зовут Korvee! :grinning: \n Я бот созданый @Kor5n (помогал @Fordocront)! \n Мои команды: \n - /x0-start @твой никнейм \n \n P. S. с ботом могут играть только двое \n \n - /x0-start pvp @твой никнейм @никнейм врага \n \n P. S. в пвп могут играть только двое \n \n - /x0-move ''кордината по х от 1-3'' ''кордината по х от 1-3'' \n \n Пример: \n      1   2   3 \n 1  ['-', '.', '.'] \n 2 ['.', '.', '.'] \n 3 ['.', '.', '.']"
-
         if message.content.startswith("-привет"):
             channel = message.channel
             await channel.send(
@@ -265,9 +263,9 @@ class CustomClient(discord.Client):
                     
                     embed = discord.Embed(title = "вы начали игру!"),
                     components=[
-                        Button(label= "Дратся", style = ButtonStyle.red, emoji = "⚔"),
-                        Button(label= "пойти в магазин", style = ButtonStyle.green, emoji = "🛍"),
-                        Button(label= "отправится в приключения", style = ButtonStyle.blue, emoji = "🏝")
+                        discord.Button(label= "Дратся", style = discord.ButtonStyle.red, emoji = "⚔"),
+                        discord.Button(label= "пойти в магазин", style = discord.ButtonStyle.green, emoji = "🛍"),
+                        discord.Button(label= "отправится в приключения", style = discord.ButtonStyle.blue, emoji = "🏝")
 
                     ]
                 )
@@ -301,23 +299,22 @@ class CustomClient(discord.Client):
 
     
 
-    async def on_member_join(self, member):
-        await member.send(f"Hello, {member.name}!")
-        await member.send("Welcome to our server!")
+    #async def on_member_join(self, member):
+
+        #await member.send(f"Hello, {member.name}!")
+        #await member.send("Welcome to our server!")
 
     async def on_ready(self):
-        DiscordComponents(bot)
         print(f"{self.user} has connected to Discord!")
-        for server in self.guilds:
-            print(server.name)
-            for channel in server.channels:
-                print(channel.name)
-            for member in server.members:
-                print(member.name)
+        #for server in self.guilds:
+         #   print(server.name)
+          #  for channel in server.channels:
+          #      print(channel.name)
+           # for member in server.members:
+            #    print(member.name)
     
-
 intents = discord.Intents.default()
 intents.members = True
 
 bot = CustomClient(intents=intents)
-bot.run(TOKEN)
+bot.run(os.getenv("DISCORD_TOKEN"))
