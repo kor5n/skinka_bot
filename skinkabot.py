@@ -4,7 +4,6 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
-from llama_cpp import Llama
 load_dotenv()
 
 intents = discord.Intents.all()
