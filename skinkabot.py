@@ -101,14 +101,13 @@ class CustomClient(discord.Client):
                         self.c[stroka][kolonka] = x_or_0
                         await self.x0in_row(message, x_or_0)
                         await self.x0change_turn(message)
-                        if not self.game_over:
-                            await message.channel.send("Ходит " + self.x0_turn + "-")
-                    else:
-                        await channel.send("Жулик! Не жульничай!")
                 else:
-                    await channel.send("Жулик! Не жульничай!")
-                if not self.game_over:
-                    await self.xprint(message)
+                    await channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
+
+            else:
+                await channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
+
+                
 
     async def x0in_row(self, message, x_or_0):
         full_count = 0
@@ -151,28 +150,26 @@ class CustomClient(discord.Client):
                 else:
                     winner = self.x0_players[1]
                 await channel.send(
-                    "Игрок " + winner+ " игравший за " + x_or_0 + " выиграл! Игра окончена."
+                    embed=discord.Embed(description="Игрок " + winner+ " игравший за " + x_or_0 + " выиграл! Игра окончена.", colour=discord.Colour.orange())
                 )
                 self.x0_players = []
             else:
                 await channel.send(
-                    "Игрок игравший за " + x_or_0 + " выиграл! Игра окончена."
+                    embed=discord.Embed(description = "Игрок игравший за " + x_or_0 + " выиграл! Игра окончена.", colour=discord.Colour.orange())
                 )
 
     async def xprint(self, message):
         channel = message.channel
-        await channel.send(self.c[0])
-        await channel.send(self.c[1])
-        await channel.send(self.c[2])
-    
+        await channel.send(embed=discord.Embed(title= "Ходит " + self.x0_turn + "-",description=self.c[0] + "\n" + self.c[1] + "\n" + self.c[2], colour=discord.Colour.blue()))
     async def x0start(self, message):
         if message.content.startswith("-x0-start bot"):
             self.game_over = False
             self.player_bot = True
             channel = message.channel       
             result = message.content.split()
-            await channel.send("Starting new game players: Korveee and " + result[2])
-            await message.channel.send("Ходит " + self.x0_turn + "-")
+            self.x0_players = ["<@"+ message.author.id + ">", "<@802503932245049354>"]
+            await channel.send(embed=discord.Embed(description ="Starting new game players: "+ self.x0_players[0] +" and " + self.x0_players[1], colour=discord.Color.green()))
+            #await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
         if message.content.startswith("-x0-start pvp"):
             self.game_over = False
@@ -182,9 +179,9 @@ class CustomClient(discord.Client):
             self.x0_players.append(result[3])
             print(self.x0_players[0], self.x0_players[1])
             await channel.send(
-                "starting new game players: " + result[2] + " and " + result[3]
+                embed=discord.Embed(description="starting new game players: " + result[2] + " and " + result[3], colour=discord.Colour.green())
             )
-            await message.channel.send("Ходит " + self.x0_turn + "-")
+            #await message.channel.send("Ходит " + self.x0_turn + "-")
             await self.xprint(message)
 
 
