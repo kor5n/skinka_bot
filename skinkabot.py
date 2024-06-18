@@ -1,4 +1,5 @@
 # skinkabot.py
+import ollama
 import json
 import os
 import random
@@ -234,10 +235,12 @@ class CustomClient(discord.Client):
 
         
     async def on_message(self, message):
+        if message.content.startswith("-ai"):
+            await self.ai(message)
+        if message.content.startswith("-x0-"):
 
-
-        await self.x0start(message)
-        await self.x0game(message)
+            await self.x0start(message)
+            await self.x0game(message)
 
 
         
@@ -321,7 +324,16 @@ class CustomClient(discord.Client):
 
         #await member.send(f"Hello, {member.name}!")
         #await member.send("Welcome to our server!")
-
+    async def ai(self, message):
+        print(message.content)
+        print(message.content.replace("-ai", ""))
+        response = ollama.chat(model='llama3', messages=[
+        {
+            'role': 'user',
+            'content': message.content.replace("-ai", ""),
+        },
+        ])
+        await message.channel.send(response['message']['content'])
     async def on_ready(self):
         print(f"{self.user} has connected to Discord!")
         #for server in self.guilds:
