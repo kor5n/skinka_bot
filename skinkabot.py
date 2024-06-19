@@ -328,13 +328,14 @@ class CustomClient(discord.Client):
     async def ai(self, message):
         print(message.content)
         print(message.content.replace("-ai", ""))
+        prompt = message.content.replace("-ai", "")
         response = ollama.chat(model='llama3', messages=[
         {
             'role': 'user',
-            'content': message.content.replace("-ai", ""),
+            'content': prompt,
         },
         ])
-        await message.channel.send(response['message']['content'])
+        await message.reply(embed = discord.Embed(title =prompt, description = response['message']['content'], colour=discord.Colour.purple()))
         
     async def on_ready(self):
         print(f"{self.user} has connected to Discord!")
