@@ -334,6 +334,7 @@ class CustomClient(discord.Client):
         },
         ])
         await message.channel.send(response['message']['content'])
+        
     async def on_ready(self):
         print(f"{self.user} has connected to Discord!")
         #for server in self.guilds:
