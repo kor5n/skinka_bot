@@ -102,11 +102,12 @@ class CustomClient(discord.Client):
                         self.c[stroka][kolonka] = x_or_0
                         await self.x0in_row(message, x_or_0)
                         await self.x0change_turn(message)
+                    else:
+                        await message.channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
                 else:
-                    await channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
-
-            else:
-                await channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
+                    await message.channel.send(embed=discord.Embed(description="Жулик! Не жульничай!", colour=discord.Colour.red()))
+                if self.game_over==False:
+                    await self.xprint(message)
 
                 
 
@@ -161,7 +162,7 @@ class CustomClient(discord.Client):
 
     async def xprint(self, message):
         channel = message.channel
-        await channel.send(embed=discord.Embed(title= "Ходит " + self.x0_turn + "-",description=self.c[0] + "\n" + self.c[1] + "\n" + self.c[2], colour=discord.Colour.blue()))
+        await message.channel.send(embed=discord.Embed(title= "Ходит " + str(self.x0_turn) + "-",description=str(self.c[0]) + "\n" +str(self.c[1]) + "\n" + str(self.c[2]), colour=discord.Colour.blue()))
     async def x0start(self, message):
         if message.content.startswith("-x0-start bot"):
             self.game_over = False
@@ -179,7 +180,7 @@ class CustomClient(discord.Client):
             self.x0_players.append(result[2])
             self.x0_players.append(result[3])
             print(self.x0_players[0], self.x0_players[1])
-            await channel.send(
+            await message.channel.send(
                 embed=discord.Embed(description="starting new game players: " + result[2] + " and " + result[3], colour=discord.Colour.green())
             )
             #await message.channel.send("Ходит " + self.x0_turn + "-")
